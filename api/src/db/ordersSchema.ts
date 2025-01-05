@@ -11,7 +11,7 @@ import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
 export const ordersTable = pgTable('orders', {
-  id: integer().primaryKey(),
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
   createdAt: timestamp().notNull().defaultNow(),
   status: varchar({ length: 50 }).notNull().default('New'),
 
@@ -23,7 +23,7 @@ export const ordersTable = pgTable('orders', {
 })
 
 export const orderItemsTable = pgTable('order_items', {
-  id: integer().primaryKey(),
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
   orderId: integer()
     .references(() => ordersTable.id)
     .notNull(),
@@ -35,22 +35,9 @@ export const orderItemsTable = pgTable('order_items', {
   price: doublePrecision().notNull(),
 })
 
-export const insertOrderSchema = createInsertSchema(ordersTable).omit({
-  id: true,
-  userId: true,
-  status: true,
-  createdAt: true,
-})
 
-export const insertOrderItemSchema = createInsertSchema(orderItemsTable).omit({
-  id: true,
-  orderId: true,
-})
 
-export const insertOrderWithItemsSchema = z.object({
-  order: insertOrderSchema,
-  items: z.array(insertOrderItemSchema),
-})
+
 
 export const updateOrderSchema = createInsertSchema(ordersTable).pick({
   status: true,
